@@ -9,7 +9,7 @@ app.get("/health", (req,res) =>{
 })
 
 app.post("/use-graph", async (req,res)=>{
-    await useGraph("Who is the king of cricket?")
-    // res.status(200).json({})
+    const result = await useGraph("Who is the king of cricket?")
+    res.status(200).json(result)
 })
 export default app;

@@ -13,87 +13,93 @@ import { mistralModel, cohereModel, geminiModel } from "./models.service.js";
 import { createAgent, providerStrategy } from "langchain";
 
 const State = new StateSchema({
-  messages: MessagesValue,
-  solution_1: new ReducedValue(z.string().default(""), {
-    reducer: (current, next) => {
-      return next;
-    },
+  problem: z.string().default(""),
+  solution_1: z.string().default(""),
+solution_2: z.string().default(""),
+  judge: z.object({
+    solution_1_score: z.number().default(0),
+    solution_2_score: z.number().default(0),
+    solution_1_reasoning: z.string().default(""),
+    solution_2_reasoning: z.string().default(""),
   }),
-  solution_2: new ReducedValue(z.string().default(""), {
-    reducer: (current, next) => {
-      return next;
-    },
-  }),
-  judge_recomendation: new ReducedValue(
-    z.object().default({
-      solution_1_score: 0,
-      solution_2_score: 0,
-    }),
-    {
-      reducer: (current, next) => {
-        return next;
-      },
-    },
-  ),
 });
 
 const solutionNode: GraphNode<typeof State> = async (state: typeof State) => {
-  const [mistral_solution, cohere_solution] = await Promise.all([
-    mistralModel.invoke(state.messages[0].text),
-    cohereModel.invoke(state.messages[0].text),
+
+  const [mistralResponse, cohereResponse] = await Promise.all([
+    mistralModel.invoke(state.problem),
+    cohereModel.invoke(state.problem),
   ]);
 
   return {
-    solution_1: mistral_solution.text,
-    solution_2: cohere_solution.text,
+    solution_1: mistralResponse.text,
+    solution_2: cohereResponse.text,
   };
 };
 
 const judge_node: GraphNode<typeof State> = async (state: typeof State) => {
   const { solution_1, solution_2 } = state;
 
-  const judge = createAgent({
+  const judgeAgent = createAgent({
     model: geminiModel,
     tools: [],
     responseFormat: providerStrategy(
       z.object({
         solution_1_score: z.number().min(0).max(10),
         solution_2_score: z.number().min(0).max(10),
-      }),
-    ),
+        solution_1_reasoning: z.string(),
+        solution_2_reasoning: z.string(),
+      })),
+      systemPrompt: `You are a helpful and precise assistant for checking the quality of the answer. You will be given a question and two solutions. You need to judge which solution is better for the question and give a score between 0-10 for each solution. Where 0 means the solution is incorrect and irrelevant, and 10 means the solution is correct and highly relevant. And give feedback on each solution, and reason why you gave the scores.`,
   });
 
-  const judgeResponse = await judge.invoke({
+  const judgeResponse = await judgeAgent.invoke({
     messages: [
-      new HumanMessage(
-        `Judge which solution is better for the question: ${state.messages[0].text} and give a score between 0-10 for each solution. Solution 1: ${solution_1}, Solution 2: ${solution_2}.Where 0 means the solution is incorrect and irrelevant, and 10 means the solution is correct and highly relevant. Provide only the scores in the response without any additional text.`,
+      new HumanMessage(`
+        problem: ${state.problem}
+        solution 1: ${solution_1}
+        solution 2: ${solution_2}
+
+        please judge the quality of the two solutions and give a score between 0-10 for each solution, and give feedback and reasoning for each solution.
+        `
+        ,
       ),
     ],
   });
 
-const result = judgeResponse.structuredResponse
+const {
+  solution_1_score,
+  solution_2_score,
+  solution_1_reasoning,
+  solution_2_reasoning
+} = judgeResponse.structuredResponse
 
 return {
-judge_recomendation: result
+judge: {
+  solution_1_score,
+  solution_2_score,
+  solution_1_reasoning,
+  solution_2_reasoning
+}
 }
 
 
 };
 
 const graph = new StateGraph(State)
-  .addNode("solution", solutionNode)
-  .addNode("judge", judge_node)
-  .addEdge(START, "solution")
-  .addEdge("solution", "judge")
-  .addEdge("judge", END)
+  .addNode("solutionNode", solutionNode)
+  .addNode("judgeNode", judge_node)
+  .addEdge(START, "solutionNode")
+  .addEdge("solutionNode", "judgeNode")
+  .addEdge("judgeNode", END)
   .compile();
 
-export default async function (userMessage: string) {
+export default async function (problem: string) {
   const result = await graph.invoke({
-    messages: [new HumanMessage(userMessage)],
+    problem: problem
   });
 
   console.log(result);
 
-  return result.messages;
+  return result;
 }
