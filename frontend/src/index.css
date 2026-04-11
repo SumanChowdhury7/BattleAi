@@ -1,0 +1,132 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --bg: #0c0e18;
+    --surface: #11131e;
+    --surface-low: #191b26;
+    --surface-mid: #1d1f2b;
+    --surface-high: #272935;
+    --surface-highest: #323440;
+    --primary: #d0bcff;
+    --primary-container: #a078ff;
+    --secondary: #4cd7f6;
+    --tertiary: #ffb690;
+    --on-surface: #e1e1f2;
+    --on-surface-var: #cbc3d7;
+    --outline-var: #494454;
+    --gold: #fbbf24;
+  }
+
+  * { box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background-color: var(--bg);
+    color: var(--on-surface);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: var(--surface); }
+  ::-webkit-scrollbar-thumb { background: rgba(208,188,255,0.18); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(208,188,255,0.32); }
+}
+
+@layer utilities {
+  /* Background grid */
+  .bg-grid {
+    background-image:
+      linear-gradient(rgba(208,188,255,.028) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(208,188,255,.028) 1px, transparent 1px);
+    background-size: 30px 30px;
+  }
+
+  /* Glassmorphism */
+  .glass {
+    background: rgba(17, 19, 30, 0.65);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+
+  /* Gradient text */
+  .gradient-text {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  /* Scrollable area */
+  .scrollable {
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(208,188,255,0.18) transparent;
+  }
+}
+
+/* Custom animations */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes slideInCard {
+  from { opacity: 0; transform: translateY(30px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes floatBob {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+@keyframes pulseDot {
+  0%,100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.7); }
+}
+@keyframes glowPulse {
+  0%,100% { box-shadow: 0 0 25px rgba(208,188,255,.3); }
+  50% { box-shadow: 0 0 50px rgba(208,188,255,.6); }
+}
+@keyframes bounce {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+@keyframes dotBlink {
+  0%,80%,100% { opacity: 0.15; transform: scale(0.8); }
+  40% { opacity: 1; transform: scale(1); }
+}
+@keyframes trophyPulse {
+  0%,100% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+}
+@keyframes shake {
+  0%,100% { transform: translateX(0); }
+  20%     { transform: translateX(-6px); }
+  40%     { transform: translateX(6px); }
+  60%     { transform: translateX(-4px); }
+  80%     { transform: translateX(4px); }
+}
+@keyframes spinGlow {
+  0%,100% { box-shadow: 0 0 20px rgba(208,188,255,.3); }
+  50% { box-shadow: 0 0 40px rgba(208,188,255,.7); }
+}
+@keyframes barGrow {
+  from { width: 0%; }
+}
+
+.animate-fadeUp    { animation: fadeUp .55s ease-out both; }
+.animate-slideCard { animation: slideInCard .5s ease-out both; }
+.animate-float     { animation: floatBob 3s ease-in-out infinite; }
+.animate-float-delayed { animation: floatBob 3s 1.5s ease-in-out infinite; }
+.animate-pulseDot  { animation: pulseDot 2s ease-in-out infinite; }
+.animate-glowPulse { animation: glowPulse 2.5s ease-in-out infinite; }
+.animate-bounce-ai { animation: bounce 1s ease-in-out infinite; }
+.animate-bounce-ai-2 { animation: bounce 1s 0.3s ease-in-out infinite; }
+.animate-dotBlink   { animation: dotBlink 1.2s ease-in-out infinite; }
+.animate-dotBlink2  { animation: dotBlink 1.2s 0.2s ease-in-out infinite; }
+.animate-dotBlink3  { animation: dotBlink 1.2s 0.4s ease-in-out infinite; }
+.animate-trophyPulse { animation: trophyPulse 2s ease-in-out infinite; }
+.animate-spinGlow  { animation: spinGlow 3s ease-in-out infinite; }
+.animate-shake     { animation: shake .35s ease-in-out; }
