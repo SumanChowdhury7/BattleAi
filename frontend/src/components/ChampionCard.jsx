@@ -31,7 +31,7 @@ export default function ChampionCard({ champion, solution, score, isWinner, dela
       <div className="flex items-center justify-between gap-4 px-5 py-4"
         style={{ background: 'rgba(50,52,64,0.9)' }}>
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-full flex items-center justify-center text-2xl flex-shrink-0"
+          <div className="w-12 h-12 rounded-full flex items-center justify-center text-2xl shrink-0"
             style={avatarBg}>
             🤖
           </div>
@@ -55,7 +55,7 @@ export default function ChampionCard({ champion, solution, score, isWinner, dela
       <div className="h-px bg-white/5" />
 
       {/* Body */}
-      <div className="px-5 py-5 max-h-[58vh] scrollable">
+      <div className="px-5 py-5 max-h-[58vh] scrollable solution-content">
         <div
           className="text-sm"
           dangerouslySetInnerHTML={{ __html: renderMarkdown(solution) }}

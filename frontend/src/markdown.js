@@ -1,10 +1,18 @@
 /**
  * Lightweight markdown-to-HTML renderer.
- * Supports: **bold**, *italic*, ### headings, - lists, 1. lists, `code`, > blockquote, ---
+ * Supports: **bold**, *italic*, ### headings, - lists, 1. lists, `code`, > blockquote, ```, ---
  */
 export function renderMarkdown(text) {
-  // Escape HTML
-  let html = text
+  const codeBlocks = [];
+
+  let html = text.replace(/```(?:([a-zA-Z0-9_-]+)\n)?([\s\S]*?)```/gm, (_, lang = '', codeContent) => {
+    const index = codeBlocks.length;
+    codeBlocks.push({ lang, codeContent });
+    return `__CODE_BLOCK_PLACEHOLDER_${index}__`;
+  });
+
+  // Escape HTML for everything outside code blocks
+  html = html
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;');
@@ -37,13 +45,42 @@ export function renderMarkdown(text) {
     .map(block => {
       block = block.trim();
       if (!block) return '';
-      if (/^<(h[1-6]|ul|ol|li|hr|blockquote)/.test(block)) return block;
+      if (/^<(h[1-6]|ul|ol|li|hr|blockquote|pre)/.test(block)) return block;
       return `<p class="text-[#cbc3d7] mb-2 leading-relaxed">${block.replace(/\n/g, '<br/>')}</p>`;
     })
     .join('\n');
 
+  // Restore fenced code blocks
+  html = html.replace(/__CODE_BLOCK_PLACEHOLDER_(\d+)__/g, (_, idx) => {
+    const { lang, codeContent } = codeBlocks[Number(idx)];
+    const escapedCode = codeContent
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+    const highlightedCode = highlightCode(escapedCode, lang);
+    const languageClass = lang ? `language-${lang}` : '';
+    return `<pre class="rounded-2xl bg-[#111827] p-4 overflow-x-auto text-[0.85rem] leading-6 my-4"><code class="block font-mono whitespace-pre-wrap ${languageClass}">${highlightedCode}</code></pre>`;
+  });
+
   return html;
 }
+
+function highlightCode(code, lang) {
+  if (!lang) return code;
+
+  const lowerLang = lang.toLowerCase();
+  if (lowerLang === 'js' || lowerLang === 'javascript') {
+    return code
+      .replace(/(\/\/[^\n]*)/g, '<span class="token-comment">$1</span>')
+      .replace(/("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|`(?:[^`\\]|\\.)*`)/g, '<span class="token-string">$1</span>')
+      .replace(/\b(const|let|var|function|return|if|else|for|while|switch|case|break|continue|async|await|import|from|export|default|class|extends|new|try|catch|finally|throw|typeof|instanceof|in|of|true|false|null|undefined)\b/g, '<span class="token-keyword">$1</span>')
+      .replace(/\b(0x[0-9a-fA-F]+|\d+(?:\.\d+)?)\b/g, '<span class="token-number">$1</span>')
+      .replace(/\b([A-Za-z_\$][A-Za-z0-9_\$]*)(?=\s*\()/g, '<span class="token-function">$1</span>');
+  }
+
+  return code;
+}
+
 
 function processLists(text) {
   const lines = text.split('\n');

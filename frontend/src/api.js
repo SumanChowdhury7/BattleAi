@@ -7,7 +7,7 @@
  * Default: http://localhost:8000
  */
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
 
 /**
  * Send a question to the backend and receive two AI solutions + judge verdict.
@@ -15,7 +15,7 @@ const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
  * @returns {Promise<{problem, solution_1, solution_2, judge}>}
  */
 export async function fetchBattle(question) {
-  const response = await fetch(`${BASE_URL}/api/battle`, {
+  const response = await fetch(`${BASE_URL}/use-graph`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ problem: question }),

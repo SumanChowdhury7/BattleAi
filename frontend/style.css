@@ -596,6 +596,24 @@ main.main-wrapper, header { position: relative; z-index: 1; }
   padding: 2px 5px; border-radius: 4px;
   font-size: 0.82rem; color: var(--secondary);
 }
+.solution-content pre {
+  background: #0f172a;
+  padding: 1rem;
+  border-radius: 1rem;
+  margin: 1rem 0;
+  overflow-x: auto;
+  color: #e2e8f0;
+}
+.solution-content pre code {
+  display: block;
+  white-space: pre;
+  line-height: 1.6;
+}
+.solution-content .token-comment { color: #94a3b8; }
+.solution-content .token-string { color: #7dd3fc; }
+.solution-content .token-keyword { color: #f5d742; font-weight: 600; }
+.solution-content .token-number { color: #fca5a5; }
+.solution-content .token-function { color: #38bdf8; }
 .solution-content blockquote {
   border-left: 3px solid rgba(208,188,255,.3);
   padding-left: 12px; color: var(--on-surface-var);
